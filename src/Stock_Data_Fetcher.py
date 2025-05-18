@@ -49,11 +49,21 @@ fig = go.Figure(go.Candlestick(
 ))
 
 fig.update_layout(
+    modebar_remove=['zoom', 'pan', 'select', 'lasso2d'],  # hide buttons if desired
     title=f"{symbol} Candlestick ({interval}, last {period})",
     template="plotly_dark",
+    hovermode='x',  # Crosshair effect
+    dragmode='pan',  # Enable panning with mouse by default
     xaxis=dict(
         title="Time (IST)",
         tickformat="%d %b %H:%M",
+        showspikes=True,
+        spikemode='across',
+        spikesnap='cursor',
+        showline=True,
+        showgrid=True,
+        spikedash='solid',
+        spikethickness=1,
         rangeslider=dict(visible=False),
         rangeselector=dict(
             buttons=[
@@ -72,7 +82,16 @@ fig.update_layout(
             dict(bounds=[0, 9.25], pattern="hour")
         ]
     ),
-    yaxis=dict(title="Price"),
+    yaxis=dict(
+        title="Price",
+        showspikes=True,
+        spikemode='across',
+        spikesnap='cursor',
+        showline=True,
+        showgrid=True,
+        spikedash='solid',
+        spikethickness=1
+    ),
     margin=dict(l=20, r=20, t=40, b=20),
     height=600
 )
