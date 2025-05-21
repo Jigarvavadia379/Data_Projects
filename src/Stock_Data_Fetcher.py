@@ -14,6 +14,35 @@ import yfinance as yf
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
+import requests
+
+# --- Yahoo autocomplete lookup function ---
+def lookup_tickers(query, region="IN", lang="en"):
+    """Return list of (symbol, company name) for a given search query."""
+    url = "https://autoc.finance.yahoo.com/autoc"
+    params = {"query": query, "region": region, "lang": lang, "corsDomain": "finance.yahoo.com"}
+    try:
+        resp = requests.get(url, params=params, timeout=5)
+        data = resp.json().get("ResultSet", {}).get("Result", [])
+        # Only keep Equities (filter out indices, ETFs, etc)
+        return [(item["symbol"], item["name"]) for item in data if item.get("typeDisp") == "Equity"]
+    except Exception as e:
+        return []
+
+# --- Streamlit Search UI ---
+search = st.text_input("🔍 Search for a company or ticker (try 'Google', 'Bharat', 'Tata', etc)")
+if search:
+    matches = lookup_tickers(search)
+    if matches:
+        display_options = [f"{name} ({symbol})" for symbol, name in matches]
+        picked = st.selectbox("Select from suggestions:", display_options)
+        if picked:
+            picked_symbol = matches[display_options.index(picked)][0]
+            st.success(f"Selected: {picked} → Ticker: {picked_symbol}")
+            # Now use picked_symbol with yfinance or any API!
+    else:
+        st.warning("No matching stocks found.")
+
 
 st.set_page_config(page_title="Dynamic Intraday Candles", layout="wide")
 st.title("🔍 NIFTY-Style Candlestick Viewer")
