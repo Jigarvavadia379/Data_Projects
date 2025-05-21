@@ -50,7 +50,7 @@ st.title("🔍 NIFTY-Style Candlestick Viewer")
 # — Sidebar inputs —
 col1, col2, col3 = st.columns([2,1,1])
 with col1:
-    symbol = st.text_input("Ticker symbol", value="^NSEI")
+    symbol = st.text_input("Ticker symbol", value=picked_symbol)
 with col2:
     period = st.selectbox("History period", ["1d","7d","30d","90d"], index=0)
 with col3:
