@@ -19,9 +19,13 @@ st.set_page_config(page_title="Dynamic Intraday Candles", layout="wide")
 st.title("🔍 NIFTY-Style Candlestick Viewer")
 
 # — Sidebar inputs —
-symbol = st.sidebar.text_input("Ticker symbol", value="^NSEI")
-period = st.sidebar.selectbox("History period", ["1d","7d","30d","90d"], index=0)
-interval = st.sidebar.selectbox("Interval", ["1m","5m","15m","30m","60m"], index=1)
+col1, col2, col3 = st.columns([2,1,1])
+with col1:
+    symbol = st.text_input("Ticker symbol", value="^NSEI")
+with col2:
+    period = st.selectbox("History period", ["1d","7d","30d","90d"], index=0)
+with col3:
+    interval = st.selectbox("Interval", ["1m","5m","15m","30m","60m"], index=1)
 
 # — Fetch data —
 @st.cache_data(ttl=300)
@@ -50,10 +54,12 @@ fig = go.Figure(go.Candlestick(
 
 fig.update_layout(
     modebar_remove=['zoom', 'pan', 'select', 'lasso2d'],  # hide buttons if desired
-    title=f"{symbol} Candlestick ({interval}, last {period})",
+    title=dict(
+    f"{symbol} Candlestick ({interval}, last {period})",
     template="plotly_dark",
     hovermode='x',  # Crosshair effect
     dragmode='pan',  # Enable panning with mouse by default
+    ),
     xaxis=dict(
         title="Time (IST)",
         tickformat="%d %b %H:%M",
@@ -73,14 +79,18 @@ fig.update_layout(
                 dict(step='all', label='All')
             ]
         ),
-        rangebreaks=[
-            # remove weekends
-            dict(bounds=["sat", "mon"]),
-            # remove hours from 15:30 to midnight
-            dict(bounds=[15.5, 24], pattern="hour"),
-            # remove hours from midnight to 09:15
-            dict(bounds=[0, 9.25], pattern="hour")
-        ]
+        rangebreaks=dict(
+            x=0, 
+            y=0.9, 
+            xanchor='left', 
+            yanchor='top',
+            bgcolor='rgba(255,255,255,0.1)',  # a bit of background so labels stand out
+            buttons=[
+                dict(count=1, label='1d', step='day',   stepmode='backward'),
+                dict(count=7, label='7d', step='day',   stepmode='backward'),
+                dict(count=1, label='1m', step='month', stepmode='backward'),
+                dict(step='all', label='All')
+            ]
     ),
     yaxis=dict(
         title="Price",
