@@ -78,21 +78,10 @@ fig.update_layout(
                 dict(count=1, label='1m', step='month', stepmode='backward'),
                 dict(step='all', label='All')
             ]
-        ),
-        rangebreaks=dict(
-            x=0,
-            y=0.9,
-            xanchor='left',
-            yanchor='top',
-            bgcolor='rgba(255,255,255,0.1)',  # a bit of background so labels stand out
-            buttons=[
-                dict(count=1, label='1d', step='day',   stepmode='backward'),
-                dict(count=7, label='7d', step='day',   stepmode='backward'),
-                dict(count=1, label='1m', step='month', stepmode='backward'),
-                dict(step='all', label='All')
-            ]
-        ),
-        yaxis=dict(
+        )
+    ),
+
+    yaxis=dict(
             title="Price",
             showspikes=True,
             spikemode='across',
@@ -101,10 +90,10 @@ fig.update_layout(
             showgrid=True,
             spikedash='solid',
             spikethickness=1
-        ),
-        margin=dict(l=20, r=20, t=40, b=20),
-        height=600
-        )
+    ),
+    margin=dict(l=20, r=20, t=40, b=20),
+    height=600
+
 )
 
 st.plotly_chart(fig, use_container_width=True)
