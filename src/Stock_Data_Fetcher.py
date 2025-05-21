@@ -55,10 +55,10 @@ fig = go.Figure(go.Candlestick(
 fig.update_layout(
     modebar_remove=['zoom', 'pan', 'select', 'lasso2d'],  # hide buttons if desired
     title=dict(
-    f"{symbol} Candlestick ({interval}, last {period})",
-    template="plotly_dark",
-    hovermode='x',  # Crosshair effect
-    dragmode='pan',  # Enable panning with mouse by default
+        f"{symbol} Candlestick ({interval}, last {period})",
+        template="plotly_dark",
+        hovermode='x',  # Crosshair effect
+        dragmode='pan',  # Enable panning with mouse by default
     ),
     xaxis=dict(
         title="Time (IST)",
@@ -80,9 +80,9 @@ fig.update_layout(
             ]
         ),
         rangebreaks=dict(
-            x=0, 
-            y=0.9, 
-            xanchor='left', 
+            x=0,
+            y=0.9,
+            xanchor='left',
             yanchor='top',
             bgcolor='rgba(255,255,255,0.1)',  # a bit of background so labels stand out
             buttons=[
@@ -91,19 +91,20 @@ fig.update_layout(
                 dict(count=1, label='1m', step='month', stepmode='backward'),
                 dict(step='all', label='All')
             ]
-    ),
-    yaxis=dict(
-        title="Price",
-        showspikes=True,
-        spikemode='across',
-        spikesnap='cursor',
-        showline=True,
-        showgrid=True,
-        spikedash='solid',
-        spikethickness=1
-    ),
-    margin=dict(l=20, r=20, t=40, b=20),
-    height=600
+        ),
+        yaxis=dict(
+            title="Price",
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            showline=True,
+            showgrid=True,
+            spikedash='solid',
+            spikethickness=1
+        ),
+        margin=dict(l=20, r=20, t=40, b=20),
+        height=600
+        )
 )
 
 st.plotly_chart(fig, use_container_width=True)
