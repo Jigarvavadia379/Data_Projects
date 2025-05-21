@@ -53,12 +53,13 @@ fig = go.Figure(go.Candlestick(
 ))
 
 fig.update_layout(
-    modebar_remove=['zoom', 'pan', 'select', 'lasso2d'],  # hide buttons if desired
-    title=dict(
-        f"{symbol} Candlestick ({interval}, last {period})",
-        template="plotly_dark",
-        hovermode='x',  # Crosshair effect
-        dragmode='pan',  # Enable panning with mouse by default
+    template="plotly_dark",     # layout-level theme
+    hovermode="x",              # crosshair on hover
+    dragmode="pan", 
+    title=dict(                 # title as a dict
+        text=f"{symbol} Candlestick ({interval}, last {period})",
+        x=0.5,                  # center the title
+        xanchor='center'
     ),
     xaxis=dict(
         title="Time (IST)",
@@ -95,5 +96,8 @@ fig.update_layout(
     height=600
 
 )
-
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(
+    fig,
+    use_container_width=True,
+    config={"modeBarButtonsToRemove": ['zoom2d','pan2d','select2d','lasso2d']}
+)
