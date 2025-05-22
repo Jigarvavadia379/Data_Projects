@@ -12,6 +12,7 @@ install_if_missing("streamlit")
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 import requests
@@ -56,18 +57,6 @@ if search:
         picked_name = unique_matches[idx][1]
 
 
-# Before using picked_symbol, try .NS if not already present
-def ensure_nse_ticker(symbol):
-    # If it already has a suffix, don't change
-    if '.' in symbol:
-        return symbol
-    # Otherwise, assume Indian NSE equity
-    return symbol + ".NS"
-
-# ... in your chart block:
-real_symbol = ensure_nse_ticker(picked_symbol)
-
-
 # --- Period and Interval ---
 period = st.selectbox("History period", ["1d", "7d", "30d", "90d"], index=0)
 interval = st.selectbox("Interval", ["1m", "5m", "15m", "30m", "60m", "1d"], index=1)
@@ -75,7 +64,7 @@ interval = st.selectbox("Interval", ["1m", "5m", "15m", "30m", "60m", "1d"], ind
 # --- Plotly Candlestick Chart ---
 @st.cache_data(ttl=300)
 def fetch_data(symbol, period, interval):
-    df = yf.download(symbol, period=period, interval=interval, progress=False)
+    df = yf.download(picked_symbol, period=period, interval=interval, progress=False)
     # flatten MultiIndex columns if present
     if isinstance(df.columns, (pd.MultiIndex)):
         df.columns = df.columns.get_level_values(0)
@@ -97,19 +86,19 @@ def fetch_data(symbol, period, interval):
     return df
 
 
-if real_symbol:
-    st.markdown(f"### :chart_with_upwards_trend: {picked_name} (`{real_symbol}`)")
-    df = fetch_data(real_symbol, period, interval)
+if picked_symbol:
+    st.markdown(f"### :chart_with_upwards_trend: {picked_name} (`{picked_symbol}`)")
+    df = fetch_data(picked_symbol, period, interval)
     if not df.empty:
         fig = go.Figure(go.Candlestick(
             x=df.index,
             open=df["Open"], high=df["High"],
             low=df["Low"], close=df["Close"],
-            name=real_symbol
+            name=picked_symbol
         ))
         fig.update_layout(
             template="plotly_dark",
-            title=f"{picked_name} ({real_symbol}) Candlestick Chart",
+            title=f"{picked_name} ({picked_symbol}) Candlestick Chart",
             xaxis=dict(title="Date / Time"),
             yaxis=dict(title="Price"),
             height=600
@@ -119,3 +108,32 @@ if real_symbol:
         st.info("No data available for this symbol/period/interval.")
 else:
     st.info("Search for a stock above to get started!")
+
+# Analysis 
+
+# Calculate Moving Averages
+df['SMA_20'] = df['Close'].rolling(window=20).mean()  # 20-day Simple MA
+df['EMA_50'] = df['Close'].ewm(span=50, adjust=False).mean()  # 50-day Exponential MA
+
+# Signal: Buy when SMA crosses above EMA, Sell when SMA crosses below EMA
+df['Signal'] = 0
+df['Signal'][20:] = np.where(df['SMA_20'][20:] > df['EMA_50'][20:], 1, 0)
+df['Position'] = df['Signal'].diff()
+
+# Plotting
+plt.figure(figsize=(14,8))
+plt.plot(df['Close'], label='Close Price', color='blue', alpha=0.5)
+plt.plot(df['SMA_20'], label='20-Day SMA', color='green')
+plt.plot(df['EMA_50'], label='50-Day EMA', color='red')
+plt.scatter(df[df['Position'] == 1].index, 
+            df[df['Position'] == 1]['Close'], 
+            marker='^', color='g', label='Buy Signal', s=100)
+plt.scatter(df[df['Position'] == -1].index, 
+            df[df['Position'] == -1]['Close'], 
+            marker='v', color='r', label='Sell Signal', s=100)
+plt.title(f'{ticker} Moving Average Crossover Signals')
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.legend()
+plt.grid()
+plt.show()
