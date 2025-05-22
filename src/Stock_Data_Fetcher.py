@@ -109,57 +109,58 @@ else:
     st.info("Search for a stock above to get started!")
 
 # Analysis 
-
-df['SMA_20'] = df['Close'].rolling(window=20).mean()
-df['EMA_50'] = df['Close'].ewm(span=50, adjust=False).mean()
-
-# Signal logic
-df['Signal'] = 0
-df['Signal'][20:] = np.where(df['SMA_20'][20:] > df['EMA_50'][20:], 1, 0)
-df['Position'] = df['Signal'].diff()
-
-# Create figure
-fig = go.Figure()
-
-# Price line
-fig.add_trace(go.Scatter(
-    x=df.index, y=df['Close'], mode='lines', name='Close Price', line=dict(color='blue', width=2), opacity=0.5
-))
-
-# SMA
-fig.add_trace(go.Scatter(
-    x=df.index, y=df['SMA_20'], mode='lines', name='20-Day SMA', line=dict(color='green', width=2)
-))
-
-# EMA
-fig.add_trace(go.Scatter(
-    x=df.index, y=df['EMA_50'], mode='lines', name='50-Day EMA', line=dict(color='red', width=2)
-))
-
-# Buy signals
-buy_signals = df[df['Position'] == 1]
-fig.add_trace(go.Scatter(
-    x=buy_signals.index, y=buy_signals['Close'],
-    mode='markers', name='Buy Signal',
-    marker=dict(symbol='triangle-up', color='lime', size=15)
-))
-
-# Sell signals
-sell_signals = df[df['Position'] == -1]
-fig.add_trace(go.Scatter(
-    x=sell_signals.index, y=sell_signals['Close'],
-    mode='markers', name='Sell Signal',
-    marker=dict(symbol='triangle-down', color='red', size=15)
-))
-
-# Layout
-fig.update_layout(
-    title=f"{ticker} Moving Average Crossover Signals",
-    xaxis_title="Date",
-    yaxis_title="Price",
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-    width=1000, height=600,
-    template="plotly_white"
-)
-
-fig.show()
+if picked_symbol:
+    df = fetch_data(picked_symbol, period, interval)
+    df['SMA_20'] = df['Close'].rolling(window=20).mean()
+    df['EMA_50'] = df['Close'].ewm(span=50, adjust=False).mean()
+    
+    # Signal logic
+    df['Signal'] = 0
+    df['Signal'][20:] = np.where(df['SMA_20'][20:] > df['EMA_50'][20:], 1, 0)
+    df['Position'] = df['Signal'].diff()
+    
+    # Create figure
+    fig = go.Figure()
+    
+    # Price line
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['Close'], mode='lines', name='Close Price', line=dict(color='blue', width=2), opacity=0.5
+    ))
+    
+    # SMA
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['SMA_20'], mode='lines', name='20-Day SMA', line=dict(color='green', width=2)
+    ))
+    
+    # EMA
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df['EMA_50'], mode='lines', name='50-Day EMA', line=dict(color='red', width=2)
+    ))
+    
+    # Buy signals
+    buy_signals = df[df['Position'] == 1]
+    fig.add_trace(go.Scatter(
+        x=buy_signals.index, y=buy_signals['Close'],
+        mode='markers', name='Buy Signal',
+        marker=dict(symbol='triangle-up', color='lime', size=15)
+    ))
+    
+    # Sell signals
+    sell_signals = df[df['Position'] == -1]
+    fig.add_trace(go.Scatter(
+        x=sell_signals.index, y=sell_signals['Close'],
+        mode='markers', name='Sell Signal',
+        marker=dict(symbol='triangle-down', color='red', size=15)
+    ))
+    
+    # Layout
+    fig.update_layout(
+        title=f"{ticker} Moving Average Crossover Signals",
+        xaxis_title="Date",
+        yaxis_title="Price",
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+        width=1000, height=600,
+        template="plotly_white"
+    )
+    
+    fig.show()
